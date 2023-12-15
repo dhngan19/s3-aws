@@ -1,95 +1,41 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+"use client"
 
+import React, { useEffect } from "react";
+import { ListBucketsCommand, S3Client } from "@aws-sdk/client-s3";
+
+const client = new S3Client({
+  region: "hcm",
+  endpoint: "https://s3.fstorage.vn",
+  credentials: {
+    secretAccessKey: "Secret_key",
+    accessKeyId: "Access_key"
+  }
+});
 export default function Home() {
+
+  const fetchData = async () => {
+    const command = new ListBucketsCommand({});
+    try {
+      const { Owner, Buckets } : any= await client.send(command);
+      console.log(
+        `${Owner.DisplayName} owns ${Buckets.length} bucket${
+          Buckets.length === 1 ? "" : "s"
+        }:`,
+      );
+      console.log(`${Buckets.map((b: { Name: any; }) => ` • ${b.Name}`).join("\n")}`);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+
+  useEffect(( ) => {
+    fetchData();
+  },[])
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+    <div>
+      <h1>S3 Bucket Contents</h1>
+    </div>
+  );
 }
